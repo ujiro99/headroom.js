@@ -21,7 +21,8 @@
         tolerance: '=',
         offset: '=',
         classes: '=',
-        scroller: '@'
+        scroller: '@',
+        reverse: '='
       },
       link: function(scope, element) {
         var options = {};

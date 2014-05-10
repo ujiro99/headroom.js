@@ -61,6 +61,7 @@ function Headroom (elem, options) {
   this.onUnpin          = options.onUnpin;
   this.onTop            = options.onTop;
   this.onNotTop         = options.onNotTop;
+  this.reverse          = options.reverse;
 }
 Headroom.prototype = {
   constructor : Headroom,
@@ -135,6 +136,7 @@ Headroom.prototype = {
    * Pins the header if it's currently unpinned
    */
   pin : function() {
+    if(!this.pinEnable){ return; }
     var classList = this.elem.classList,
       classes = this.classes;
     
@@ -301,12 +303,10 @@ Headroom.prototype = {
     }
 
     if(this.shouldUnpin(currentScrollY, toleranceExceeded)) {
-      this.unpin();
+      this.reverse? this.pin() : this.unpin();
     }
     else if(this.shouldPin(currentScrollY, toleranceExceeded)) {
-      if(this.pinEnable) {
-      this.pin();
-    }
+      this.reverse? this.unpin() : this.pin();
     }
 
     this.pinEnable = true;
@@ -321,6 +321,7 @@ Headroom.options = {
   tolerance : 0,
   offset: 0,
   scroller: window,
+  reverse: false,
   classes : {
     pinned : 'headroom--pinned',
     unpinned : 'headroom--unpinned',
