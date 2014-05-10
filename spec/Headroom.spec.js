@@ -6,7 +6,7 @@
 
     beforeEach(function() {
       classList = jasmine.createSpyObj('classList', ['add', 'remove', 'contains']);
-      elem      = { classList : classList };
+      elem      = { classList : classList, addEventListener: function () {}, removeEventListener: function () {} };
       headroom  = new Headroom(elem);
       Headroom.cutsTheMustard = true;
     });
@@ -92,9 +92,11 @@
     describe('destroy', function() {
 
       var removeEventListener;
+      var eRemoveEventListener;
 
       beforeEach(function() {
         removeEventListener = spyOn(global, 'removeEventListener');
+        eRemoveEventListener = spyOn(elem, 'removeEventListener');
       });
 
       it('cleans up after events and classes', function() {
@@ -104,6 +106,7 @@
 
         expect(classList.remove).toHaveBeenCalled();
         expect(removeEventListener).toHaveBeenCalledWith('scroll', headroom.debouncer, false);
+        expect(eRemoveEventListener).toHaveBeenCalledWith('click', headroom.onClick, false);
         expect(headroom.initialised).toBe(false);
       });
 
@@ -111,20 +114,23 @@
 
     describe('attachEvent', function() {
       var addEventListener;
+      var eAddEventListener;
       var requestAnimationFrame;
 
       global.requestAnimationFrame = function() {};
 
       beforeEach(function() {
         addEventListener = spyOn(global, 'addEventListener');
+        eAddEventListener = spyOn(elem, 'addEventListener');
         requestAnimationFrame = spyOn(global, 'requestAnimationFrame');
       });
 
-      it('should attach listener for scroll event', function(){
+      it('should attach listener for scroll and click event', function(){
         headroom.attachEvent();
 
         expect(headroom.initialised).toBe(true);
         expect(addEventListener).toHaveBeenCalledWith('scroll', headroom.debouncer, false);
+        expect(eAddEventListener).toHaveBeenCalledWith('click', headroom.onClick, false);
         expect(requestAnimationFrame.calls.length).toBe(1);
       });
 
@@ -133,6 +139,7 @@
         headroom.attachEvent();
 
         expect(addEventListener.calls.length).toBe(1);
+        expect(eAddEventListener.calls.length).toBe(1);
         expect(requestAnimationFrame.calls.length).toBe(1);
       });
 

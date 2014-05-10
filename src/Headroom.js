@@ -50,11 +50,13 @@ function Headroom (elem, options) {
   this.lastKnownScrollY = 0;
   this.elem             = elem;
   this.debouncer        = new Debouncer(this.update.bind(this));
+  this.onClick          = this.unpinOnClick.bind(this);
   this.tolerance        = options.tolerance;
   this.classes          = options.classes;
   this.offset           = options.offset;
   this.scroller         = options.scroller;
   this.initialised      = false;
+  this.pinEnable        = true;
   this.onPin            = options.onPin;
   this.onUnpin          = options.onUnpin;
   this.onTop            = options.onTop;
@@ -88,11 +90,12 @@ Headroom.prototype = {
 
     this.initialised = false;
     this.scroller.removeEventListener('scroll', this.debouncer, false);
+    this.elem.removeEventListener('click', this.onClick, false);
     this.elem.classList.remove(classes.unpinned, classes.pinned, classes.top, classes.initial);
   },
 
   /**
-   * Attaches the scroll event
+   * Attaches the event
    * @private
    */
   attachEvent : function() {
@@ -100,11 +103,20 @@ Headroom.prototype = {
       this.lastKnownScrollY = this.getScrollY();
       this.initialised = true;
       this.scroller.addEventListener('scroll', this.debouncer, false);
+      this.elem.addEventListener('click', this.onClick , false);
 
       this.debouncer.handleEvent();
     }
   },
   
+  /**
+   * Unpin and prevent pin() once.
+   */
+  unpinOnClick: function () {
+    this.unpin();
+    this.pinEnable = false;
+  },
+
   /**
    * Unpins the header if it's currently pinned
    */
@@ -292,9 +304,12 @@ Headroom.prototype = {
       this.unpin();
     }
     else if(this.shouldPin(currentScrollY, toleranceExceeded)) {
+      if(this.pinEnable) {
       this.pin();
     }
+    }
 
+    this.pinEnable = true;
     this.lastKnownScrollY = currentScrollY;
   }
 };
